@@ -30,7 +30,7 @@ contains
   ! case and simultaneously update fields due to vertical motion as given by div
 
   subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,   &
-       tt,tl,rtt,rt,fr0,fr1.xka)
+       tt,tl,rtt,rt,fr0,fr1,xka)
 
     integer, intent (in):: n1,n2, n3
     real, intent (in)   :: div, sst, alat, time, fr0, fr1, xka
@@ -85,17 +85,17 @@ mu = zenith(alat,time)
         !!!EW: modified to use the maximum ql as cloud top. If multiple same maximum, the highest point is picked.
         ki = maxloc(rc(:,i,j),1)
           do k=1,n1
-             km1=max(1,k-1)
-          if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
-             lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
-             flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
-          else
-          !this is for dycoms in fact
-             lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
-             flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
-             !!!This was the default PBL height determination
-             ! if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
-             ! end if
+              km1=max(1,k-1)
+              if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
+                 lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
+                 flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
+              else 
+              !this is for dycoms in fact
+                 lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
+                 flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
+                 !!!This was the default PBL height determination
+                 ! if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
+              end if
           enddo
 
 !print *, 'astex rad after lw'
