@@ -95,7 +95,7 @@ mu = zenith(alat,time)
              flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
              !!!This was the default PBL height determination
              ! if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
-          end if
+             ! end if
           enddo
 
 !print *, 'astex rad after lw'
