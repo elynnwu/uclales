@@ -89,7 +89,7 @@ contains
     use grid, only : deltaz, deltay, deltax, nzp, nyp, nxp, nxpart,           &
          dtlong, dzrat,dzmax, th00, umean, vmean, naddsc, level,              &
          filprf, expnme, iradtyp, igrdtyp, nfpt, distim, lspongeinit, runtype,             &
-         CCN, lwaterbudget, lcouvreux, prc_lev, isfctyp, sfc_albedo, lrad_ca
+         CCN, lwaterbudget, lcouvreux, prc_lev, isfctyp, sfc_albedo, lrad_ca, fr0, fr1, xka
     use init, only : us, vs, ts, rts, ps, hs, ipsflg, itsflg,irsflg, iseed, hfilin,   &
          zrand,lhomrestart,mag_pert_q,mag_pert_t
     use stat, only : ssam_intvl, savg_intvl
@@ -149,7 +149,8 @@ contains
          clouddiff, &
          lpartic,lpartsgs,lrandsurf,lpartstat,lpartdump, &           ! Particles
          lpartdumpui,lpartdumpth,lpartdumpmr,frqpartdump,&           ! Particles
-         lpartdrop, ldropstart                                       ! Particles
+         lpartdrop, ldropstart,&                                       ! Particles
+         fr0, fr1, xka !3 constants for rad type = 2
 
 
     deflev = deflate_level
@@ -167,6 +168,7 @@ contains
     open  (1,status='old',file='NAMELIST')
     read  (1, nml=model)
     close (1)
+
 !     write (0,model)
     !
     ! write file variable control to standard output

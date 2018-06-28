@@ -30,10 +30,10 @@ contains
   ! case and simultaneously update fields due to vertical motion as given by div
 
   subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,   &
-       tt,tl,rtt,rt)
+       tt,tl,rtt,rt,fr0,fr1.xka)
 
     integer, intent (in):: n1,n2, n3
-    real, intent (in)   :: div, sst, alat, time
+    real, intent (in)   :: div, sst, alat, time, fr0, fr1, xka
     real, intent (in)   :: zt(n1),zm(n1),dzi_t(n1),dn0(n1),rc(n1,n2,n3),   &
          tl(n1,n2,n3),rt(n1,n2,n3)
     real, intent (inout):: tt(n1,n2,n3),rtt(n1,n2,n3)
@@ -41,28 +41,28 @@ contains
     character (len=5), intent (in) :: case_name
 
     integer :: i, j, k, km1, kp1,ki
-    real    :: lwp(n2,n3), mu,tauc, tau(n1), xka,fr0,fr1,xkb,fact
+    real    :: lwp(n2,n3), mu,tauc, tau(n1), xkb,fact
 !     real,parameter :: dens_air=1.14
     real,parameter :: rho_l=1000.
     real,parameter :: reff=1.e-05
 
-
+!!Elynn - making fr0 and fr1 dynamic
 !irina
 !default values
-       xka = 85.
-       fr0 = 70.
-       fr1 = 22.
+!       xka = 85.
+!       fr0 = 70.
+!       fr1 = 22.
 
-    if (trim(case_name) == 'atex') then
-       xka = 130.
-       fr0 = 74.
-       fr1 = 0.
-    else if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
-       xka = 130.
-       xkb = 80.
-       fr0 = 70.
-       fr1 = 10.
-    end if
+!    if (trim(case_name) == 'atex') then
+!       xka = 130.
+!       fr0 = 74.
+!       fr1 = 0.
+!    else if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
+!       xka = 130.
+!       xkb = 80.
+!       fr0 = 70.
+!       fr1 = 10.
+!    end if
 
 !print *, 'uses astex rad'
 
@@ -72,7 +72,9 @@ contains
 mu = zenith(alat,time)
 
 !print *, 'mu', mu
-
+   xkb = 80. !EW: this value is never used
+!   print *, 'fr0', fr0
+!   print *, 'fr1', fr1
    lwp=0.
 !print *, 'print 1'
    swn(:,:,:)=0.
@@ -80,7 +82,8 @@ mu = zenith(alat,time)
 
     do j=3,n3-2
        do i=3,n2-2
-        ki = n1
+        !!!EW: modified to use the maximum ql as cloud top. If multiple same maximum, the highest point is picked.
+        ki = maxloc(rc(:,i,j),1)
           do k=1,n1
              km1=max(1,k-1)
           if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
@@ -90,7 +93,8 @@ mu = zenith(alat,time)
           !this is for dycoms in fact
              lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
              flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
-             if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
+             !!!This was the default PBL height determination
+             ! if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
           end if
           enddo
 

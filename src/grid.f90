@@ -61,6 +61,10 @@ module grid
   real              :: distim = 300.0      ! dissipation timescale
   logical           :: lspongeinit = .true. ! Sponge layer acts on initial profiles
 
+  real              :: fr0 = 70. !fr0 and fr1 are for rad type = 2, default to DYCOMS values
+  real              :: fr1 = 22. !fr0 and fr1 added by Elynn
+  real              :: xka = 85. !xka added 
+
   character (len=7), allocatable, save :: sanal(:)
   character (len=80):: expnme = 'Default' ! Experiment name
   character (len=80):: filprf = 'x'       ! File Prefix
