@@ -29,7 +29,7 @@ contains
   ! SW fluxes (LW similar to DYCOMS, but without the 3rd term, SW Delta Eddington EUROCS)
   ! case and simultaneously update fields due to vertical motion as given by div
 
-  subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,dzi_m   &
+  subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,dzi_m,   &
        tt,tl,rtt,rt,fr0,fr1,xka)
 
     integer, intent (in):: n1,n2, n3
