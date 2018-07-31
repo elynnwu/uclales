@@ -29,19 +29,19 @@ contains
   ! SW fluxes (LW similar to DYCOMS, but without the 3rd term, SW Delta Eddington EUROCS)
   ! case and simultaneously update fields due to vertical motion as given by div
 
-  subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,   &
+  subroutine gcss_rad(n1,n2,n3,alat,time,case_name,div,sst, rc,dn0,flx,swn,zt,zm,dzi_t,dzi_m   &
        tt,tl,rtt,rt,fr0,fr1,xka)
 
     integer, intent (in):: n1,n2, n3
     real, intent (in)   :: div, sst, alat, time, fr0, fr1, xka
     real, intent (in)   :: zt(n1),zm(n1),dzi_t(n1),dn0(n1),rc(n1,n2,n3),   &
-         tl(n1,n2,n3),rt(n1,n2,n3)
+         tl(n1,n2,n3),rt(n1,n2,n3), dzi_m(n1)
     real, intent (inout):: tt(n1,n2,n3),rtt(n1,n2,n3)
     real, intent (inout)  :: flx(n1,n2,n3),swn(n1,n2,n3)
     character (len=5), intent (in) :: case_name
 
     integer :: i, j, k, km1, kp1,ki
-    real    :: lwp(n2,n3), mu,tauc, tau(n1), xkb,fact
+    real    :: lwp(n2,n3), mu,tauc, tau(n1), xkb,fact, sval, dmy
 !     real,parameter :: dens_air=1.14
     real,parameter :: rho_l=1000.
     real,parameter :: reff=1.e-05
@@ -82,8 +82,6 @@ mu = zenith(alat,time)
 
     do j=3,n3-2
        do i=3,n2-2
-        !!!EW: modified to use the maximum ql as cloud top. If multiple same maximum, the highest point is picked.
-        ki = maxloc(rc(:,i,j),1)
           do k=1,n1
               km1=max(1,k-1)
               if (trim(case_name) == 'astex' .or. trim(case_name) == 'trans') then
@@ -93,9 +91,16 @@ mu = zenith(alat,time)
               !this is for dycoms in fact
                  lwp(i,j)=lwp(i,j)+max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(km1)))
                  flx(k,i,j)=fr1*exp(-1.*xka*lwp(i,j))
-                 !!!This was the default PBL height determination
-                 ! if ( (rc(k,i,j) > 0.01e-3) .and. (rt(k,i,j) >= 0.008) ) ki=k
               end if
+          enddo
+          !!!EW: modified to use maximum thetaL gradient as PBL height (ki)
+          sval = 0.
+          do k=2,n1-5
+            dmy = (tt(k+1,i,j)-tt(k,i,j))*dzi_m(k) !dzi_m is one over grid spacing, in the thetaL grid
+            if (dmy>sval) then
+              sval = dmy
+              ki = k !ki is the index for PBL height
+            end if
           enddo
 
 !print *, 'astex rad after lw'
@@ -116,10 +121,10 @@ mu = zenith(alat,time)
 !print *, 'astex rad after sunray'
           end if
 
-  fact = div*cp*dn0(ki)
+          fact = div*cp*dn0(ki)
 
 !print *, 'astex rad before lw2'
-		flx(1,i,j)=flx(1,i,j)+fr0*exp(-1.*xka*lwp(i,j))
+          flx(1,i,j)=flx(1,i,j)+fr0*exp(-1.*xka*lwp(i,j))
           do k=2,n1
              km1=max(2,k-1)
             lwp(i,j)=lwp(i,j)-max(0.,rc(k,i,j)*dn0(k)*(zm(k)-zm(k-1)))
